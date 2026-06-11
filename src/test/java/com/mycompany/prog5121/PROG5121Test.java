@@ -74,7 +74,7 @@ public class PROG5121Test {
         System.out.println("checkCellPhoneNumber");
         String number = "+27838968976";
         boolean expResult = true;
-        boolean result = PROG5121.checkCellPhoneNumber(number);
+        boolean result = PROG5121.CheckCellPhoneNumber(number);
         assertEquals(expResult, result);
         // TODO review the generated test code and remove the default call to fail.
         //True("The test case is a prototype.");
@@ -170,5 +170,18 @@ public class PROG5121Test {
         // TODO review the generated test code and remove the default call to fail.
         //True("The test case is a prototype.");
     }
-    
+
+    /**
+     * Test of manageStoredMessagesMenu method, of class PROG5121.
+     */
+    @Test
+    public void testManageStoredMessagesMenu() {
+        System.out.println("manageStoredMessagesMenu");
+        PROG5121.manageStoredMessagesMenu();
+        // TODO review the generated test code and remove the default call to fail.
+        fail("The test case is a prototype.");
+    }
+
+   
+  
 }

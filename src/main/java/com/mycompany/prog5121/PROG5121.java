@@ -19,11 +19,21 @@ public class PROG5121 {
     private static int messageCounter = 0;
     static final JSONArray messageStorage = new JSONArray();
 
+    // Parallel ArrayLists to dynamically populate per assignment requirements
+    static final ArrayList<String> sentMessages = new ArrayList<>();
+    static final ArrayList<String> disregardedMessages = new ArrayList<>();
+    static final ArrayList<String> storedMessages = new ArrayList<>();
+    static final ArrayList<String> messageHashes = new ArrayList<>();
+    static final ArrayList<Long> messageIds = new ArrayList<>();
+    static final ArrayList<String> storedSenders = new ArrayList<>();
+    static final ArrayList<String> storedRecipients = new ArrayList<>();
+
     static Scanner scanner = new Scanner(System.in);
 
-    // Hardcoded mock credentials to simulate the required login function shown in your image
-    private static final String storedUsername = "admin_";
-    private static final String storedPassword = "Password1!";
+    // Hardcoded mock credentials updated to your specific details
+    private static final String storedUsername = "Kyl_1";
+    private static final String storedPassword = "Ch&&sec@ke99!";
+    private static String currentUser = "";
 
     // VALIDATION & AUTHENTICATION UTILITIES
     
@@ -37,17 +47,29 @@ public class PROG5121 {
         return Pattern.matches(regex, password);
     }
 
+    public static String registerUser(String username, String password) {
+        if (!checkUserName(username)) {
+            return "Username is not correctly formatted";
+        }
+
+        if (!checkPasswordComplexity(password)) {
+            return "Password is not correctly formatted";
+        }
+
+        return "Username and password successfully captured. User registered";
+    }
+
     public static boolean loginUser(String username, String password,
                                   String storedUsername, String storedPassword) {
         return username != null && username.equals(storedUsername)
                 && password != null && password.equals(storedPassword);
     }
 
-    public static String returnLoginStatus(boolean status, String username) {
+    public static String returnLoginStatus(boolean status) {
         if (status) {
-            return "Login successful! Welcome back " + username + "!";
+            return "Login successful! Welcome back ky1_1!";
         } else {
-            return "Username or password incorrect.";
+            return "Login failed!";
         }
     }
 
@@ -60,18 +82,19 @@ public class PROG5121 {
         String loginPass = scanner.nextLine();
 
         boolean status = loginUser(loginUser, loginPass, storedUsername, storedPassword);
-        System.out.println(returnLoginStatus(status, loginUser));
+        
+        if (status) {
+            currentUser = loginUser;
+        }
+        
+        System.out.println(returnLoginStatus(status));
         
         return status;
     }
 
-    private static String CheckRecipient(String recipient) {
-        if (recipient == null || !recipient.matches("^\\+\\d{9,12}$")) {
-            System.out.println("Invalid number. Must include country code and be <=12 digits.");
-            return null;
-        }
-        return recipient;
-    }
+    public static boolean CheckCellPhoneNumber(String number) {
+    return number != null && number.matches("^\\+\\d{9,12}$");
+}
 
     
     // CORE FUNCTIONALITIES
@@ -81,12 +104,11 @@ public class PROG5121 {
 
         System.out.print("\nEnter recipient number (+CCxxxxxxxxx): ");
         String recipient = scanner.nextLine();
-        recipient = CheckRecipient(recipient);
 
-        if (recipient == null) {
-            return;
-        }
-
+if (!CheckCellPhoneNumber(recipient)) {
+    System.out.println("Invalid number. Must include country code and be <=12 digits.");
+    return;
+}
         System.out.print("Enter your message (max 250 characters): ");
         String message = scanner.nextLine();
 
@@ -119,26 +141,34 @@ public class PROG5121 {
             }
         }
 
-        if (action == 2) {
-            System.out.println("Message Cancelled");
-            return;
-        }
-
         JSONObject jsonMessage = new JSONObject();
         jsonMessage.put("MessageID", messageId);
         jsonMessage.put("MessageHash", hash);
         jsonMessage.put("Recipient", recipient);
         jsonMessage.put("Message", message);
 
+        if (action == 2) {
+            disregardedMessages.add(message);
+            System.out.println("Message Cancelled");
+            return;
+        }
+
         if (action == 3) {
             messageStorage.add(jsonMessage);
+            
+            storedMessages.add(message);
+            messageIds.add(messageId);
+            messageHashes.add(hash);
+            storedSenders.add(currentUser);
+            storedRecipients.add(recipient);
+            
             System.out.println("Message stored.");
             return;
         }
 
-        // Increment tracking variables upon sending
         Total_messages++;
         messageCounter++;
+        sentMessages.add(message);
 
         System.out.println("\nMessage Sent!");
         System.out.println("Message ID: " + messageId);
@@ -168,6 +198,99 @@ public class PROG5121 {
         }
     }
 
+    static void manageStoredMessagesMenu() {
+        while (true) {
+            System.out.println("\n--- Stored Messages Options ---");
+            System.out.println("a. Display sender and recipient of all stored messages");
+            System.out.println("b. Display the longest stored message");
+            System.out.println("c. Search for a message ID and display corresponding recipient and message");
+            System.out.println("d. Search for all messages stored for a particular recipient");
+            System.out.println("e. Delete a message using the message hash");
+            System.out.println("f. Display a report that lists the full details of all stored messages");
+            System.out.println("g. Back to Main Menu");
+            System.out.print("Select sub-option (a-g): ");
+            String subChoice = scanner.nextLine().trim().toLowerCase();
+
+            if (subChoice.equals("g")) break;
+
+            switch (subChoice) {
+                case "a":
+                    if (storedMessages.isEmpty()) { System.out.println("No stored messages."); break; }
+                    System.out.println("\n--- Senders & Recipients ---");
+                    for (int i = 0; i < storedMessages.size(); i++) {
+                        System.out.println("Message " + (i + 1) + " -> Sender: " + storedSenders.get(i) + " | Recipient: " + storedRecipients.get(i));
+                    }
+                    break;
+                case "b":
+                    if (storedMessages.isEmpty()) { System.out.println("No stored messages."); break; }
+                    String longest = storedMessages.get(0);
+                    for (String msg : storedMessages) {
+                        if (msg.length() > longest.length()) longest = msg;
+                    }
+                    System.out.println("\nLongest Message: \"" + longest + "\"");
+                    break;
+                case "c":
+                    if (storedMessages.isEmpty()) { System.out.println("No stored messages."); break; }
+                    System.out.print("Enter Message ID: ");
+                    try {
+                        long searchId = Long.parseLong(scanner.nextLine());
+                        int index = messageIds.indexOf(searchId);
+                        if (index != -1) {
+                            System.out.println("Recipient: " + storedRecipients.get(index));
+                            System.out.println("Message: " + storedMessages.get(index));
+                        } else {
+                            System.out.println("ID not found.");
+                        }
+                    } catch (NumberFormatException e) { System.out.println("Invalid ID format."); }
+                    break;
+                case "d":
+                    if (storedMessages.isEmpty()) { System.out.println("No stored messages."); break; }
+                    System.out.print("Enter Recipient string: ");
+                    String matchRecip = scanner.nextLine().trim();
+                    boolean foundAny = false;
+                    for (int i = 0; i < storedRecipients.size(); i++) {
+                        if (storedRecipients.get(i).equals(matchRecip)) {
+                            System.out.println("ID: " + messageIds.get(i) + " | Message: " + storedMessages.get(i));
+                            foundAny = true;
+                        }
+                    }
+                    if (!foundAny) System.out.println("No matches found.");
+                    break;
+                case "e":
+                    if (storedMessages.isEmpty()) { System.out.println("No stored messages."); break; }
+                    System.out.print("Enter Hash value to delete: ");
+                    String targetedHash = scanner.nextLine().trim();
+                    int delIndex = messageHashes.indexOf(targetedHash);
+                    if (delIndex != -1) {
+                        storedMessages.remove(delIndex);
+                        messageIds.remove(delIndex);
+                        messageHashes.remove(delIndex);
+                        storedSenders.remove(delIndex);
+                        storedRecipients.remove(delIndex);
+                        System.out.println("Successfully removed from parallel registers.");
+                    } else {
+                        System.out.println("Hash code not found.");
+                    }
+                    break;
+                case "f":
+                    if (storedMessages.isEmpty()) { System.out.println("No stored records."); break; }
+                    System.out.println("\n================ FULL TASK REPORT ================");
+                    for (int i = 0; i < storedMessages.size(); i++) {
+                        System.out.println("Record #" + (i + 1));
+                        System.out.println("  Message ID:   " + messageIds.get(i));
+                        System.out.println("  Message Hash: " + messageHashes.get(i));
+                        System.out.println("  From:         " + storedSenders.get(i));
+                        System.out.println("  To:           " + storedRecipients.get(i));
+                        System.out.println("  Content:      \"" + storedMessages.get(i) + "\"");
+                        System.out.println("-------------------------------------------------");
+                    }
+                    break;
+                default:
+                    System.out.println("Invalid selection.");
+            }
+        }
+    }
+
     
     // MAIN ENTRY POINT
    
@@ -189,7 +312,7 @@ public class PROG5121 {
         while (!exit) {
             System.out.println("\nSelect an Option:");
             System.out.println("1. Post Message");
-            System.out.println("2. Previous Messages");
+            System.out.println("2. Stored Messages (Manage Arrays)");
             System.out.println("3. Exit");
             System.out.print("Choice: ");
 
@@ -210,10 +333,9 @@ public class PROG5121 {
                     }
                     break;
                 case 2:
-                    showRecentlySentMessages();
+                    manageStoredMessagesMenu();
                     break;
                 case 3:
-                    // Auto-saves your arrays into a file structure upon application shutdown
                     saveMessagesToJSON();
                     System.out.println("Exiting application. Goodbye!");
                     exit = true;
