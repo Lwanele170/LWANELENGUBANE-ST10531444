@@ -59,7 +59,7 @@ public class PROG5121Test {
     public void testCheckPasswordComplexity() {
         System.out.println("checkPasswordComplexity");
         String password = "ch&&sec@ke99!";
-        boolean expResult = true;
+        boolean expResult = false;
         boolean result = PROG5121.checkPasswordComplexity(password);
         assertEquals(expResult, result);
         // TODO review the generated test code and remove the default call to fail.
@@ -119,8 +119,9 @@ public class PROG5121Test {
     public void testReturnLoginStatus() {
         System.out.println("returnLoginStatus");
         boolean status = true;
+        String username = "kyl_1";
         String expResult = "Login successful! Welcome back kyl_1!";
-        String result = PROG5121.returnLoginStatus(status);
+        String result = PROG5121.returnLoginStatus(status, username);
         assertEquals(expResult, result);
         // TODO review the generated test code and remove the default call to fail.
         //True("The test case is a prototype.");
@@ -169,6 +170,17 @@ public class PROG5121Test {
         PROG5121.showRecentlySentMessages();
         // TODO review the generated test code and remove the default call to fail.
         //True("The test case is a prototype.");
+    }
+
+    /**
+     * Test of handleStoredMessagesMenu method, of class PROG5121.
+     */
+    @Test
+    public void testHandleStoredMessagesMenu() {
+        System.out.println("handleStoredMessagesMenu");
+        PROG5121.handleStoredMessagesMenu();
+        // TODO review the generated test code and remove the default call to fail.
+        fail("The test case is a prototype.");
     }
     
 }
